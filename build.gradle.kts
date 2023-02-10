@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
     val minestomVersion = "aebf72de90"
     val mockkVersion = "1.13.3"
     val coroutinesCoreVersion = "1.6.4"
