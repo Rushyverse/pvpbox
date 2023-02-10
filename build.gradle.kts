@@ -17,7 +17,7 @@ repositories {
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
     val minestomVersion = "aebf72de90"
-    val mockkVersion = "1.13.3"
+    val mockkVersion = "1.13.4"
     val coroutinesCoreVersion = "1.6.4"
 
     implementation("com.github.Rushyverse:core:c75a7ccc9f")
