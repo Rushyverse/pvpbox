@@ -78,14 +78,7 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
             API.registerCommands()
             addCommands()
 
-            PvpExtension.init();
-            MinecraftServer.getGlobalEventHandler().addChild(PvpExtension.legacyEvents())
-            .addChild(
-                PvPConfig.emptyBuilder()
-                    .food(FoodConfig.legacyBuilder().naturalExhaustion(false))
-                    .build().createNode()
-            );
-            instance.explosionSupplier = PvpExplosionSupplier.INSTANCE;
+            loadPvp()
 
             MinecraftServer.setBrandName("Rushyverse-Pvpbox")
         }
@@ -143,5 +136,13 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
     private fun addCommands() {
         val commandManager = MinecraftServer.getCommandManager()
 
+    }
+
+    private fun loadPvp() {
+        PvpExtension.init();
+        val foodConfig = FoodConfig.emptyBuilder(false) // Disable food
+        val pvpConfig = PvPConfig.legacyBuilder().food(foodConfig).build()
+        MinecraftServer.getGlobalEventHandler().addChild(pvpConfig.createNode())
+        instance.explosionSupplier = PvpExplosionSupplier.INSTANCE;
     }
 }
