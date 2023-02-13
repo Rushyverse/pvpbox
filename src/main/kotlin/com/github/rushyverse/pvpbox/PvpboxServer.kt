@@ -13,12 +13,12 @@ import com.github.rushyverse.pvpbox.listener.*
 import com.github.rushyverse.pvpbox.listener.block.PlayerBreakBlockListener
 import com.github.rushyverse.pvpbox.listener.block.PlayerPlaceBlockListener
 import com.github.rushyverse.pvpbox.listener.death.PlayerDeathListener
-import com.github.rushyverse.pvpbox.listener.death.PlayerPreDeathListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerDropItemListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerInventoryClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerItemClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerSwapItemListener
 import io.github.bloepiloepi.pvp.PvpExtension
+import io.github.bloepiloepi.pvp.config.DamageConfig
 import io.github.bloepiloepi.pvp.config.FoodConfig
 import io.github.bloepiloepi.pvp.config.PvPConfig
 import io.github.bloepiloepi.pvp.explosion.PvpExplosionSupplier
@@ -120,7 +120,6 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
         globalEventHandler.addListener(PlayerAttackListener(spawnArea))
         globalEventHandler.addListener(PlayerMoveListener(limitY))
         globalEventHandler.addListener(PlayerDeathListener(spawnPoint,spawnArea))
-        globalEventHandler.addListener(PlayerPreDeathListener())
 
         globalEventHandler.addListener(PlayerItemClickListener())
         globalEventHandler.addListener(PlayerDropItemListener())
@@ -141,7 +140,15 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
     private fun loadPvp() {
         PvpExtension.init();
         val foodConfig = FoodConfig.emptyBuilder(false) // Disable food
-        val pvpConfig = PvPConfig.legacyBuilder().food(foodConfig).build()
+        val damageConfig = DamageConfig.legacyBuilder()
+            .fallDamage(false)
+            .equipmentDamage(false)
+            .exhaustion(false)
+        val pvpConfig = PvPConfig.legacyBuilder()
+            .food(foodConfig)
+            .damage(damageConfig)
+            .build()
+
         MinecraftServer.getGlobalEventHandler().addChild(pvpConfig.createNode())
         instance.explosionSupplier = PvpExplosionSupplier.INSTANCE;
     }
