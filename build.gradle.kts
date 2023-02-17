@@ -11,7 +11,6 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven("https://jitpack.io")
-    maven("https://reposilite.worldseed.online/public")
 }
 
 dependencies {
@@ -25,8 +24,6 @@ dependencies {
     implementation("com.ibm.icu:icu4j:72.1")
 
     implementation("com.github.TogAr2:MinestomPvP:bebed02b71")
-
-    implementation("net.worldseed.multipart:WorldSeedEntityEngine:6.0.2")
 
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesCoreVersion")
