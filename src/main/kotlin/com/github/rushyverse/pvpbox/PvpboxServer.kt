@@ -7,6 +7,7 @@ import com.github.rushyverse.core.cache.CacheClient
 import com.github.rushyverse.pvpbox.configuration.PvpboxConfiguration
 import com.github.rushyverse.pvpbox.items.hotbar.HotbarItemsManager
 import com.github.rushyverse.pvpbox.kit.ArcherKit
+import com.github.rushyverse.pvpbox.kit.AssassinKit
 import com.github.rushyverse.pvpbox.kit.WarriorKit
 import com.github.rushyverse.pvpbox.kit.commons.AbstractKit
 import com.github.rushyverse.pvpbox.listener.*
@@ -69,7 +70,8 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
 
             kitsList = listOf<AbstractKit>(
                 WarriorKit(),
-                ArcherKit()
+                ArcherKit(),
+                AssassinKit()
             )
 
             val globalEventHandler = MinecraftServer.getGlobalEventHandler()
@@ -128,6 +130,8 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
         globalEventHandler.addListener(PlayerMoveListener(limitY))
         globalEventHandler.addListener(PlayerDeathListener(spawnPoint,spawnArea))
         globalEventHandler.addListener(PlayerPreDeathListener())
+
+        globalEventHandler.addListener(AssassinKit.KnifeListener())
 
         globalEventHandler.addListener(PlayerItemClickListener())
         globalEventHandler.addListener(PlayerDropItemListener())
