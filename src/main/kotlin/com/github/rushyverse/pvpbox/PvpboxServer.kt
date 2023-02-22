@@ -9,7 +9,10 @@ import com.github.rushyverse.pvpbox.items.hotbar.HotbarItemsManager
 import com.github.rushyverse.pvpbox.kit.ArcherKit
 import com.github.rushyverse.pvpbox.kit.WarriorKit
 import com.github.rushyverse.pvpbox.kit.commons.AbstractKit
-import com.github.rushyverse.pvpbox.listener.*
+import com.github.rushyverse.pvpbox.listener.PlayerAttackListener
+import com.github.rushyverse.pvpbox.listener.PlayerLoginListener
+import com.github.rushyverse.pvpbox.listener.PlayerMoveListener
+import com.github.rushyverse.pvpbox.listener.PlayerSpawnListener
 import com.github.rushyverse.pvpbox.listener.block.PlayerBreakBlockListener
 import com.github.rushyverse.pvpbox.listener.block.PlayerPlaceBlockListener
 import com.github.rushyverse.pvpbox.listener.death.PlayerDeathListener
@@ -29,7 +32,6 @@ import io.ktor.serialization.kotlinx.json.*
 import io.lettuce.core.RedisURI
 import kotlinx.serialization.json.Json
 import net.minestom.server.MinecraftServer
-import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
 import net.minestom.server.event.GlobalEventHandler
 import net.minestom.server.instance.Instance
@@ -39,18 +41,17 @@ suspend fun main(args: Array<String>) {
     PvpboxServer(args.firstOrNull()).start()
 }
 
-private lateinit var kitsList: List<AbstractKit>
-private lateinit var spawnArea: CubeArea<Player>
-private lateinit var instance: Instance
-private lateinit var spawnPoint: Pos
-
 class PvpboxServer(private val configuration: String? = null) : RushyServer() {
-
-    private  val limitY = 80.0 // Below this limit, player is killed
 
     companion object {
         const val BUNDLE_PVPBOX = "pvpbox"
     }
+
+    lateinit var kitsList: List<AbstractKit>
+        private set
+
+    lateinit var instance: Instance
+        private set
 
     override suspend fun start() {
         start<PvpboxConfiguration>(configuration) {
@@ -62,18 +63,14 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
             )
 
             instance = MinecraftServer.getInstanceManager().instances.first()
-            val pos1 = Pos(-114.0, 152.0, 103.0)
-            val pos2 = Pos(-134.0, 167.0, 123.0)
-            spawnArea = CubeArea<Player>(instance, pos1, pos2)
-            spawnPoint = Pos(-123.5, 156.0, 113.5).withYaw(-180F)
 
-            kitsList = listOf<AbstractKit>(
+            kitsList = listOf(
                 WarriorKit(),
                 ArcherKit()
             )
 
             val globalEventHandler = MinecraftServer.getGlobalEventHandler()
-            addListeners(globalEventHandler, it, translationsProvider)
+            addListeners(this, globalEventHandler, it, translationsProvider)
 
             API.registerCommands()
             addCommands()
@@ -105,21 +102,25 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
      * @param instanceContainer Instance container of the server.
      */
     private fun addListeners(
+        configuration: PvpboxConfiguration,
         globalEventHandler: GlobalEventHandler,
-        instanceContainer: InstanceContainer, translationsProvider: TranslationsProvider
+        instanceContainer: InstanceContainer,
+        translationsProvider: TranslationsProvider
     ) {
         globalEventHandler.addListener(PlayerLoginListener(instanceContainer))
+        val areaConfig = configuration.area
+        val spawnArea = CubeArea<Player>(instance, areaConfig.spawnArea1, areaConfig.spawnArea2)
         globalEventHandler.addListener(
             PlayerSpawnListener(
                 translationsProvider,
                 HotbarItemsManager(translationsProvider, kitsList),
-                spawnPoint,
+                areaConfig.spawnPoint,
                 spawnArea,
             )
         )
         globalEventHandler.addListener(PlayerAttackListener(spawnArea))
-        globalEventHandler.addListener(PlayerMoveListener(limitY))
-        globalEventHandler.addListener(PlayerDeathListener(spawnPoint,spawnArea))
+        globalEventHandler.addListener(PlayerMoveListener(areaConfig.limitY))
+        globalEventHandler.addListener(PlayerDeathListener(areaConfig.spawnPoint, spawnArea))
 
         globalEventHandler.addListener(PlayerItemClickListener())
         globalEventHandler.addListener(PlayerDropItemListener())
