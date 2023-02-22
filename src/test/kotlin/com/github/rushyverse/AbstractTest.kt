@@ -3,10 +3,12 @@ package com.github.rushyverse
 import com.github.rushyverse.api.configuration.BungeeCordConfiguration
 import com.github.rushyverse.api.configuration.IConfiguration
 import com.github.rushyverse.api.configuration.VelocityConfiguration
+import com.github.rushyverse.pvpbox.configuration.AreaConfiguration
 import com.github.rushyverse.pvpbox.configuration.PvpboxConfiguration
 import com.github.rushyverse.pvpbox.configuration.ServerConfiguration
 import com.github.rushyverse.utils.getAvailablePort
 import kotlinx.serialization.hocon.Hocon
+import net.minestom.server.coordinate.Pos
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import kotlin.test.AfterTest
@@ -32,6 +34,12 @@ abstract class AbstractTest {
                 false,
                 BungeeCordConfiguration(false, ""),
                 VelocityConfiguration(false, "")
+            ),
+            AreaConfiguration(
+                80.0,
+                Pos(-123.5, 156.0, 113.5, -180f, 0f),
+                Pos(-114.0, 152.0, 103.0),
+                Pos(-134.0, 167.0, 123.0)
             )
         )
 
