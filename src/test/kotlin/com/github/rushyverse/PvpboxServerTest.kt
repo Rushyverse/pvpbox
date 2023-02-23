@@ -21,6 +21,7 @@ import com.github.rushyverse.pvpbox.listener.item.PlayerItemClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerSwapItemListener
 import com.github.rushyverse.utils.randomString
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import net.minestom.server.MinecraftServer
 import net.minestom.server.entity.Player
@@ -72,14 +73,14 @@ class PvpboxServerTest : AbstractTest() {
     inner class UseConfiguration {
 
         @Test
-        fun `should use configuration to turn on the server`() = runTest {
+         fun `should use configuration to turn on the server`()  {
             val configuration = defaultConfigurationOnAvailablePort()
             val configurationFile = fileOfTmpDirectory(randomString())
             configurationToHoconFile(configuration, configurationFile)
 
             copyWorldInTmpDirectory(configuration)
 
-            PvpboxServer(configurationFile.absolutePath).start()
+            runBlocking { PvpboxServer(configurationFile.absolutePath).start() }
 
             // If no exception is thrown, the world is loaded
             assertTrue { MinecraftServer.isStarted() }

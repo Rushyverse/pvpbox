@@ -19,10 +19,11 @@ dependencies {
     val mockkVersion = "1.13.3"
     val coroutinesCoreVersion = "1.6.4"
 
-    implementation("com.github.Rushyverse:core:644fc1b6cc")
+    implementation("com.github.Rushyverse:core:644fc1b6cc") {
+        exclude("ch.qos.logback")
+    }
     implementation("com.github.Rushyverse:api:feat~npc-SNAPSHOT")
     implementation("com.ibm.icu:icu4j:72.1")
-
     implementation("com.github.TogAr2:MinestomPvP:bebed02b71")
 
     testImplementation(kotlin("test-junit5"))
