@@ -5,6 +5,8 @@ import com.github.rushyverse.api.position.CubeArea
 import com.github.rushyverse.api.translation.TranslationsProvider
 import com.github.rushyverse.core.cache.CacheClient
 import com.github.rushyverse.pvpbox.configuration.PvpboxConfiguration
+import com.github.rushyverse.pvpbox.imagemap.MapImage
+import com.github.rushyverse.pvpbox.imagemap.MapImageManager
 import com.github.rushyverse.pvpbox.items.hotbar.HotbarItemsManager
 import com.github.rushyverse.pvpbox.kit.ArcherKit
 import com.github.rushyverse.pvpbox.kit.WarriorKit
@@ -32,6 +34,7 @@ import io.ktor.serialization.kotlinx.json.*
 import io.lettuce.core.RedisURI
 import kotlinx.serialization.json.Json
 import net.minestom.server.MinecraftServer
+import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
 import net.minestom.server.event.GlobalEventHandler
 import net.minestom.server.instance.Instance
@@ -76,6 +79,16 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
             addCommands()
 
             loadPvp()
+
+            val imageManager = MapImageManager()
+            val pos = Pos(-122.0, 163.0, 119.0)
+            imageManager.registerMap(
+                MapImage(
+                    "doge.png",
+                    5, 3, instance, pos
+                )
+            )
+
 
             MinecraftServer.setBrandName("Rushyverse-Pvpbox")
         }
