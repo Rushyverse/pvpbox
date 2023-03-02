@@ -52,6 +52,10 @@ tasks {
         kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    withType<JavaCompile> {
+        targetCompatibility = JavaVersion.VERSION_17.toString()
+    }
+
     build {
         dependsOn(shadowJar)
     }
