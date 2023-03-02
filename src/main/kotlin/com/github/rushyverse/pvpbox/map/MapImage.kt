@@ -1,4 +1,4 @@
-package com.github.rushyverse.pvpbox.imagemap
+package com.github.rushyverse.pvpbox.map
 
 import com.github.rushyverse.pvpbox.PvpboxServer
 import net.minestom.server.coordinate.Point
@@ -18,16 +18,17 @@ import java.io.InputStream
 import javax.imageio.ImageIO
 
 
-internal object ImageAsMap {
+internal object MapImage {
     private var packets: Array<SendablePacket?>? = null
 
-    fun packets(resourceImageName: String, widthBlocks: Int, heightBlocks: Int): Array<SendablePacket?>? {
+    fun packets(): Array<SendablePacket?>? {
         return if (packets != null) packets else try {
-            val framebuffer = LargeGraphics2DFramebuffer(widthBlocks * 128, heightBlocks * 128)
-            val imageStream: InputStream = PvpboxServer::class.java.getResourceAsStream("/$resourceImageName")!!
-            val image = ImageIO.read(imageStream)
-            framebuffer.renderer.drawRenderedImage(image, AffineTransform.getScaleInstance(1.0, 1.0))
-            packets = mapPackets(framebuffer)
+            val framebuffer = LargeGraphics2DFramebuffer(5 * 128, 3 * 128)
+            PvpboxServer::class.java.getResourceAsStream("/doge.png")!!.use {
+                val image = ImageIO.read(it)
+                framebuffer.renderer.drawRenderedImage(image, AffineTransform.getScaleInstance(1.0, 1.0))
+                packets = mapPackets(framebuffer)
+            }
             packets
         } catch (e: IOException) {
             throw RuntimeException(e)

@@ -4,8 +4,8 @@ import com.github.rushyverse.api.extension.setItemStack
 import com.github.rushyverse.api.position.CubeArea
 import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.rushyverse.api.translation.TranslationsProvider
-import com.github.rushyverse.pvpbox.imagemap.ImageAsMap
 import com.github.rushyverse.pvpbox.items.hotbar.HotbarItemsManager
+import com.github.rushyverse.pvpbox.map.MapImage
 import com.github.rushyverse.pvpbox.scoreboard.PvpboxScoreboard
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
@@ -34,7 +34,7 @@ class PlayerSpawnListener(
 
         player.teleport(spawnPoint)
 
-        ImageAsMap.packets("doge.png", 5, 3)?.toList()?.let { player.sendPackets(it) };
+        MapImage.packets()?.toList()?.let { player.sendPackets(it) }
 
         return EventListener.Result.SUCCESS
     }

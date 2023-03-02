@@ -5,8 +5,6 @@ import com.github.rushyverse.api.position.CubeArea
 import com.github.rushyverse.api.translation.TranslationsProvider
 import com.github.rushyverse.core.cache.CacheClient
 import com.github.rushyverse.pvpbox.configuration.PvpboxConfiguration
-import com.github.rushyverse.pvpbox.imagemap.MapImage
-import com.github.rushyverse.pvpbox.imagemap.MapImageManager
 import com.github.rushyverse.pvpbox.items.hotbar.HotbarItemsManager
 import com.github.rushyverse.pvpbox.kit.ArcherKit
 import com.github.rushyverse.pvpbox.kit.WarriorKit
@@ -22,6 +20,7 @@ import com.github.rushyverse.pvpbox.listener.item.PlayerDropItemListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerInventoryClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerItemClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerSwapItemListener
+import com.github.rushyverse.pvpbox.map.MapImage
 import io.github.bloepiloepi.pvp.PvpExtension
 import io.github.bloepiloepi.pvp.config.DamageConfig
 import io.github.bloepiloepi.pvp.config.FoodConfig
@@ -67,6 +66,8 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
 
             instance = MinecraftServer.getInstanceManager().instances.first()
 
+            MapImage.create(instance, Pos(-122.0, 163.0, 119.0))
+
             kitsList = listOf(
                 WarriorKit(),
                 ArcherKit()
@@ -79,16 +80,6 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
             addCommands()
 
             loadPvp()
-
-            val imageManager = MapImageManager()
-            val pos = Pos(-122.0, 163.0, 119.0)
-            imageManager.registerMap(
-                MapImage(
-                    "doge.png",
-                    5, 3, instance, pos
-                )
-            )
-
 
             MinecraftServer.setBrandName("Rushyverse-Pvpbox")
         }
