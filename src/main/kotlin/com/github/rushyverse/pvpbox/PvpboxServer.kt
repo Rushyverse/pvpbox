@@ -20,6 +20,7 @@ import com.github.rushyverse.pvpbox.listener.item.PlayerDropItemListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerInventoryClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerItemClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerSwapItemListener
+import com.github.rushyverse.pvpbox.map.MapImage
 import io.github.bloepiloepi.pvp.PvpExtension
 import io.github.bloepiloepi.pvp.config.DamageConfig
 import io.github.bloepiloepi.pvp.config.FoodConfig
@@ -34,6 +35,7 @@ import io.ktor.serialization.kotlinx.json.*
 import io.lettuce.core.RedisURI
 import kotlinx.serialization.json.Json
 import net.minestom.server.MinecraftServer
+import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
 import net.minestom.server.event.GlobalEventHandler
 import net.minestom.server.instance.Instance
@@ -66,6 +68,8 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
             )
 
             instance = MinecraftServer.getInstanceManager().instances.first()
+
+            MapImage.create(instance, Pos(-122.0, 163.0, 119.0))
 
             kitsList = listOf(
                 WarriorKit(),

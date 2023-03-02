@@ -5,6 +5,7 @@ import com.github.rushyverse.api.position.CubeArea
 import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.rushyverse.api.translation.TranslationsProvider
 import com.github.rushyverse.pvpbox.items.hotbar.HotbarItemsManager
+import com.github.rushyverse.pvpbox.map.MapImage
 import com.github.rushyverse.pvpbox.scoreboard.PvpboxScoreboard
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
@@ -32,6 +33,8 @@ class PlayerSpawnListener(
         player.setHeldItemSlot(4)
 
         player.teleport(spawnPoint)
+
+        MapImage.packets()?.toList()?.let { player.sendPackets(it) }
 
         return EventListener.Result.SUCCESS
     }
