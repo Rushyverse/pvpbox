@@ -24,7 +24,9 @@ import io.github.bloepiloepi.pvp.PvpExtension
 import io.github.bloepiloepi.pvp.config.DamageConfig
 import io.github.bloepiloepi.pvp.config.FoodConfig
 import io.github.bloepiloepi.pvp.config.PvPConfig
+import io.github.bloepiloepi.pvp.events.LegacyKnockbackEvent
 import io.github.bloepiloepi.pvp.explosion.PvpExplosionSupplier
+import io.github.bloepiloepi.pvp.legacy.LegacyKnockbackSettings
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -36,6 +38,7 @@ import net.minestom.server.entity.Player
 import net.minestom.server.event.GlobalEventHandler
 import net.minestom.server.instance.Instance
 import net.minestom.server.instance.InstanceContainer
+
 
 suspend fun main(args: Array<String>) {
     PvpboxServer(args.firstOrNull()).start()
@@ -149,6 +152,20 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
             .food(foodConfig)
             .damage(damageConfig)
             .build()
+
+        // Knockback
+        val kbSettings = LegacyKnockbackSettings.builder()
+            .horizontal(0.35)
+            .vertical(0.4)
+            .verticalLimit(0.4)
+            .extraHorizontal(0.45)
+            .extraVertical(0.1)
+            .build()
+        MinecraftServer.getGlobalEventHandler().addListener(
+            LegacyKnockbackEvent::class.java
+        ) { event: LegacyKnockbackEvent ->
+            event.settings = kbSettings
+        }
 
         MinecraftServer.getGlobalEventHandler().addChild(pvpConfig.createNode())
         instance.explosionSupplier = PvpExplosionSupplier.INSTANCE;
