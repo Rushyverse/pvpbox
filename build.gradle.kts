@@ -41,6 +41,7 @@ kotlin {
             }
         }
     }
+    jvmToolchain(17)
 }
 
 tasks {
@@ -50,10 +51,6 @@ tasks {
 
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
-    withType<JavaCompile> {
-        targetCompatibility = JavaVersion.VERSION_17.toString()
     }
 
     build {
