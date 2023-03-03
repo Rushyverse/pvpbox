@@ -3,9 +3,7 @@ package com.github.rushyverse
 import com.github.rushyverse.api.configuration.BungeeCordConfiguration
 import com.github.rushyverse.api.configuration.IConfiguration
 import com.github.rushyverse.api.configuration.VelocityConfiguration
-import com.github.rushyverse.pvpbox.configuration.AreaConfiguration
-import com.github.rushyverse.pvpbox.configuration.PvpboxConfiguration
-import com.github.rushyverse.pvpbox.configuration.ServerConfiguration
+import com.github.rushyverse.pvpbox.configuration.*
 import com.github.rushyverse.utils.getAvailablePort
 import kotlinx.serialization.hocon.Hocon
 import net.minestom.server.coordinate.Pos
@@ -39,7 +37,25 @@ abstract class AbstractTest {
                 80.0,
                 Pos(-123.5, 156.0, 113.5, -180f, 0f),
                 Pos(-114.0, 152.0, 103.0),
-                Pos(-134.0, 167.0, 123.0)
+                Pos(-134.0, 167.0, 123.0),
+                MapImageConfiguration(
+                    "doge.png",
+                    5, 3,
+                    Pos(-122.0, 163.0, 119.0, -180F, 0F)
+                )
+            ),
+            PvpConfiguration(
+                false,
+                false,
+                false,
+                false,
+                KnockbackConfiguration(
+                    0.35,
+                    0.4,
+                    0.4,
+                    0.45,
+                    0.1
+                )
             )
         )
 
