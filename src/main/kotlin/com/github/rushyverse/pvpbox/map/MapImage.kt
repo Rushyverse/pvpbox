@@ -30,7 +30,9 @@ class MapImage(
 
     companion object {
         /**
-         * Creates the maps on the board in the lobby
+         * Create an item frame on which the image will be displayed
+         * @param instance The instance where you want to create the frame.
+         * @param maximum The position of the frame.
          */
         fun createItemFrame(instance: Instance, maximum: Pos) {
             val maxX = maximum.blockX()
@@ -54,7 +56,9 @@ class MapImage(
         }
 
         /**
-         * Creates packets for maps that will display an image on the board in the lobby
+         * Creates packets from the image.
+         * @param framebuffer The frame buffer to convert as packets.
+         * @return The list of packets.
          */
         private fun mapPackets(framebuffer: LargeGraphics2DFramebuffer): Array<SendablePacket?> {
             val packets = arrayOfNulls<SendablePacket>(15)
@@ -69,6 +73,11 @@ class MapImage(
 
     private var packets: Array<SendablePacket?>? = null
 
+    /**
+     * Get the packets of the current Map Image.
+     * This function generates and stores packets if they are not created.
+     * @return The list of packets.
+     */
     fun packets(): Array<SendablePacket?>? {
         return if (packets != null) packets else try {
             val framebuffer = LargeGraphics2DFramebuffer(widthBlocks * 128, heightBlocks * 128)
