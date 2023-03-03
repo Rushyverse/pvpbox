@@ -16,7 +16,8 @@ class PlayerSpawnListener(
     private val translationsProvider: TranslationsProvider,
     private val hotbarItemsManager: HotbarItemsManager,
     private val spawnPoint: Pos,
-    private val spawnArea: CubeArea<Player>
+    private val spawnArea: CubeArea<Player>,
+    private val mapImage: MapImage
 ) : EventListener<PlayerSpawnEvent> {
 
     override fun eventType(): Class<PlayerSpawnEvent> {
@@ -34,7 +35,7 @@ class PlayerSpawnListener(
 
         player.teleport(spawnPoint)
 
-        MapImage.packets()?.toList()?.let { player.sendPackets(it) }
+        mapImage.packets()?.toList()?.let { player.sendPackets(it) }
 
         return EventListener.Result.SUCCESS
     }

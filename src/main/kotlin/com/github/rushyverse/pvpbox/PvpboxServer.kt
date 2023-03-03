@@ -36,7 +36,6 @@ import io.ktor.serialization.kotlinx.json.*
 import io.lettuce.core.RedisURI
 import kotlinx.serialization.json.Json
 import net.minestom.server.MinecraftServer
-import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
 import net.minestom.server.event.GlobalEventHandler
 import net.minestom.server.instance.Instance
@@ -62,7 +61,13 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
                 )
             )
 
-            MapImage.create(it, Pos(-122.0, 163.0, 119.0))
+            val mapImageConfig = area.mapImage
+            val mapImage = MapImage(
+                mapImageConfig.resourceImageName,
+                mapImageConfig.widthBlocks,
+                mapImageConfig.heightBlocks
+            )
+            MapImage.createItemFrame(it, mapImageConfig.mapPosition)
 
             val kitsList = listOf(
                 WarriorKit(),
@@ -70,7 +75,7 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
             )
 
             val globalEventHandler = MinecraftServer.getGlobalEventHandler()
-            addListeners(this, globalEventHandler, it, translationsProvider, kitsList)
+            addListeners(this, globalEventHandler, it, translationsProvider, kitsList, mapImage)
 
             API.registerCommands()
             addCommands()
@@ -106,7 +111,8 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
         globalEventHandler: GlobalEventHandler,
         instanceContainer: InstanceContainer,
         translationsProvider: TranslationsProvider,
-        kitsList: List<AbstractKit>
+        kitsList: List<AbstractKit>,
+        mapImage: MapImage
     ) {
         globalEventHandler.addListener(PlayerLoginListener(instanceContainer))
         val areaConfig = configuration.area
@@ -117,6 +123,7 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
                 HotbarItemsManager(translationsProvider, kitsList),
                 areaConfig.spawnPoint,
                 spawnArea,
+                mapImage
             )
         )
         globalEventHandler.addListener(PlayerAttackListener(spawnArea))

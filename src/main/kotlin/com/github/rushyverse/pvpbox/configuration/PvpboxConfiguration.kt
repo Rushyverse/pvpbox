@@ -49,6 +49,7 @@ data class ServerConfiguration(
  * @property spawnPoint Represents the spawn point of the game server.
  * @property spawnArea1 Represents the first position allowing to build the cuboid of the protected area.
  * @property spawnArea2 Represents the second position allowing to build the cuboid of the protected area.
+ * @property mapImage Corresponds to the MapImage configuration.
  * @constructor
  */
 @Serializable
@@ -59,7 +60,25 @@ data class AreaConfiguration(
     @Serializable(with = PosSerializer::class)
     val spawnArea1: Pos,
     @Serializable(with = PosSerializer::class)
-    val spawnArea2: Pos
+    val spawnArea2: Pos,
+    val mapImage: MapImageConfiguration
+)
+
+/**
+ * Map Image configuration.
+ * @property resourceImageName The resource that used to be printed as map.
+ * @property widthBlocks The width blocks size desired for the item frame.
+ * @property heightBlocks The height blocks size desired for the item frame.
+ * @property mapPosition The position of the map including yaw.
+ * @constructor
+ */
+@Serializable
+data class MapImageConfiguration(
+    val resourceImageName: String,
+    val widthBlocks: Int,
+    val heightBlocks: Int,
+    @Serializable(with = PosSerializer::class)
+    val mapPosition: Pos
 )
 
 /**
