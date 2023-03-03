@@ -30,6 +30,11 @@ class MapImage(
 
     companion object {
         /**
+         * Corresponds to the default resolution used to build image as packets.
+         */
+        const val DEFAULT_RESOLUTION = 128;
+
+        /**
          * Create an item frame on which the image will be displayed
          * @param instance The instance where you want to create the frame.
          * @param maximum The position of the frame.
@@ -65,7 +70,7 @@ class MapImage(
             for (i in 0..14) {
                 val x = i % 5
                 val y = i / 5
-                packets[i] = framebuffer.createSubView(x * 128, y * 128).preparePacket(i)
+                packets[i] = framebuffer.createSubView(x shl 7, y shl 7).preparePacket(i)
             }
             return packets
         }
@@ -80,7 +85,8 @@ class MapImage(
      */
     fun packets(): Array<SendablePacket?>? {
         return if (packets != null) packets else try {
-            val framebuffer = LargeGraphics2DFramebuffer(widthBlocks * 128, heightBlocks * 128)
+            val framebuffer =
+                LargeGraphics2DFramebuffer(widthBlocks * DEFAULT_RESOLUTION, heightBlocks * DEFAULT_RESOLUTION)
             javaClass.getResourceAsStream("/$resourceImageName")!!.use {
                 val image = ImageIO.read(it)
                 framebuffer.renderer.drawRenderedImage(image, AffineTransform.getScaleInstance(1.0, 1.0))
