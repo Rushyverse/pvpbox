@@ -73,18 +73,14 @@ class PvpboxServerTest : AbstractTest() {
     inner class UseConfiguration {
 
         @Test
-         fun `should use configuration to turn on the server`() = runTest {
+        fun `should use configuration to turn on the server`() = runTest {
             val configuration = defaultConfigurationOnAvailablePort()
             val configurationFile = fileOfTmpDirectory(randomString())
             configurationToHoconFile(configuration, configurationFile)
-
             copyWorldInTmpDirectory(configuration)
-
-            runBlocking { PvpboxServer(configurationFile.absolutePath).start() }
-
+            PvpboxServer(configurationFile.absolutePath).start()
             // If no exception is thrown, the world is loaded
             assertTrue { MinecraftServer.isStarted() }
-
             val server = MinecraftServer.getServer()
             assertEquals(configuration.server.port, server.port)
             assertEquals("0.0.0.0", server.address)
@@ -108,7 +104,7 @@ class PvpboxServerTest : AbstractTest() {
 
             sequenceOf(
                 PlayerLoginListener(mockk()),
-                PlayerSpawnListener(mockk(), mockk(), spawnPoint, spawnArea),
+                PlayerSpawnListener(mockk(), mockk(), spawnPoint, spawnArea, mockk()),
                 PlayerAttackListener(spawnArea),
                 PlayerMoveListener(limitY),
                 PlayerDeathListener(spawnPoint, spawnArea),
