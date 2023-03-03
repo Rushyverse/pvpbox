@@ -73,7 +73,7 @@ class PvpboxServerTest : AbstractTest() {
     inner class UseConfiguration {
 
         @Test
-         fun `should use configuration to turn on the server`()  {
+         fun `should use configuration to turn on the server`() = runTest {
             val configuration = defaultConfigurationOnAvailablePort()
             val configurationFile = fileOfTmpDirectory(randomString())
             configurationToHoconFile(configuration, configurationFile)
