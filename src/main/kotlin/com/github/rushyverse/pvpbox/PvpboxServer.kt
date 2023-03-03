@@ -52,12 +52,6 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
         const val BUNDLE_PVPBOX = "pvpbox"
     }
 
-    lateinit var kitsList: List<AbstractKit>
-        private set
-
-    lateinit var instance: Instance
-        private set
-
     override suspend fun start() {
         start<PvpboxConfiguration>(configuration) {
             val translationsProvider = createTranslationsProvider(
@@ -67,22 +61,20 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
                 )
             )
 
-            instance = MinecraftServer.getInstanceManager().instances.first()
+            MapImage.create(it, Pos(-122.0, 163.0, 119.0))
 
-            MapImage.create(instance, Pos(-122.0, 163.0, 119.0))
-
-            kitsList = listOf(
+            val kitsList = listOf(
                 WarriorKit(),
                 ArcherKit()
             )
 
             val globalEventHandler = MinecraftServer.getGlobalEventHandler()
-            addListeners(this, globalEventHandler, it, translationsProvider)
+            addListeners(this, globalEventHandler, it, translationsProvider, kitsList)
 
             API.registerCommands()
             addCommands()
 
-            loadPvp()
+            loadPvp(it)
 
             MinecraftServer.setBrandName("Rushyverse-Pvpbox")
         }
@@ -112,11 +104,12 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
         configuration: PvpboxConfiguration,
         globalEventHandler: GlobalEventHandler,
         instanceContainer: InstanceContainer,
-        translationsProvider: TranslationsProvider
+        translationsProvider: TranslationsProvider,
+        kitsList: List<AbstractKit>
     ) {
         globalEventHandler.addListener(PlayerLoginListener(instanceContainer))
         val areaConfig = configuration.area
-        val spawnArea = CubeArea<Player>(instance, areaConfig.spawnArea1, areaConfig.spawnArea2)
+        val spawnArea = CubeArea<Player>(instanceContainer, areaConfig.spawnArea1, areaConfig.spawnArea2)
         globalEventHandler.addListener(
             PlayerSpawnListener(
                 translationsProvider,
@@ -145,7 +138,7 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
 
     }
 
-    private fun loadPvp() {
+    private fun loadPvp(instance: Instance) {
         PvpExtension.init();
         val foodConfig = FoodConfig.emptyBuilder(false) // Disable food
         val damageConfig = DamageConfig.legacyBuilder()
