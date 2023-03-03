@@ -11,7 +11,6 @@ import net.minestom.server.item.metadata.MapMeta
 import net.minestom.server.map.framebuffers.LargeGraphics2DFramebuffer
 import net.minestom.server.network.packet.server.SendablePacket
 import java.awt.geom.AffineTransform
-import java.io.IOException
 import javax.imageio.ImageIO
 
 /**
@@ -66,13 +65,11 @@ class MapImage(
          * @return The list of packets.
          */
         private fun mapPackets(framebuffer: LargeGraphics2DFramebuffer): Array<SendablePacket?> {
-            val packets = arrayOfNulls<SendablePacket>(15)
-            for (i in 0..14) {
-                val x = i % 5
-                val y = i / 5
-                packets[i] = framebuffer.createSubView(x shl 7, y shl 7).preparePacket(i)
+            return Array(15) {
+                val x = it % 5
+                val y = it / 5
+                framebuffer.createSubView(x shl 7, y shl 7).preparePacket(it)
             }
-            return packets
         }
     }
 
@@ -84,17 +81,17 @@ class MapImage(
      * @return The list of packets.
      */
     fun packets(): Array<SendablePacket?>? {
-        return if (packets != null) packets else try {
+        return if (packets != null)
+            packets
+        else {
             val framebuffer =
                 LargeGraphics2DFramebuffer(widthBlocks * DEFAULT_RESOLUTION, heightBlocks * DEFAULT_RESOLUTION)
-            javaClass.getResourceAsStream("/$resourceImageName")!!.use {
+            javaClass.getResourceAsStream("/$resourceImageName")!!.buffered().use {
                 val image = ImageIO.read(it)
                 framebuffer.renderer.drawRenderedImage(image, AffineTransform.getScaleInstance(1.0, 1.0))
                 packets = mapPackets(framebuffer)
             }
             packets
-        } catch (e: IOException) {
-            throw RuntimeException(e)
         }
     }
 }
