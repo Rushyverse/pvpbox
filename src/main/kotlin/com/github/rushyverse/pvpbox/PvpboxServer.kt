@@ -4,6 +4,7 @@ import com.github.rushyverse.api.RushyServer
 import com.github.rushyverse.api.position.CubeArea
 import com.github.rushyverse.api.translation.TranslationsProvider
 import com.github.rushyverse.core.cache.CacheClient
+import com.github.rushyverse.pvpbox.configuration.PvpConfiguration
 import com.github.rushyverse.pvpbox.configuration.PvpboxConfiguration
 import com.github.rushyverse.pvpbox.items.hotbar.HotbarItemsManager
 import com.github.rushyverse.pvpbox.kit.ArcherKit
@@ -74,7 +75,7 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
             API.registerCommands()
             addCommands()
 
-            loadPvp(it)
+            loadPvp(pvp, it)
 
             MinecraftServer.setBrandName("Rushyverse-Pvpbox")
         }
@@ -138,25 +139,26 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
 
     }
 
-    private fun loadPvp(instance: Instance) {
+    private fun loadPvp(configuration: PvpConfiguration, instance: Instance) {
         PvpExtension.init();
-        val foodConfig = FoodConfig.emptyBuilder(false) // Disable food
+        val foodConfig = FoodConfig.emptyBuilder(configuration.food) // Disable food
         val damageConfig = DamageConfig.legacyBuilder()
-            .fallDamage(false)
-            .equipmentDamage(false)
-            .exhaustion(false)
+            .fallDamage(configuration.fallDamage)
+            .equipmentDamage(configuration.equipmentDamage)
+            .exhaustion(configuration.exhaustion)
         val pvpConfig = PvPConfig.legacyBuilder()
             .food(foodConfig)
             .damage(damageConfig)
             .build()
 
         // Knockback
+        val kbConf = configuration.knockback
         val kbSettings = LegacyKnockbackSettings.builder()
-            .horizontal(0.35)
-            .vertical(0.4)
-            .verticalLimit(0.4)
-            .extraHorizontal(0.45)
-            .extraVertical(0.1)
+            .horizontal(kbConf.horizontal)
+            .vertical(kbConf.vertical)
+            .verticalLimit(kbConf.verticalLimit)
+            .extraHorizontal(kbConf.extraHorizontal)
+            .extraVertical(kbConf.extraVertical)
             .build()
         MinecraftServer.getGlobalEventHandler().addListener(
             LegacyKnockbackEvent::class.java

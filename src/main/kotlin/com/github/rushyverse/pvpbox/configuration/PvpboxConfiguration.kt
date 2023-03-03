@@ -16,7 +16,9 @@ data class PvpboxConfiguration(
     @SerialName("server")
     override val server: ServerConfiguration,
     @SerialName("area")
-    val area: AreaConfiguration
+    val area: AreaConfiguration,
+    @SerialName("pvp")
+    val pvp: PvpConfiguration
 ) : IConfiguration
 
 @Suppress("PROVIDED_RUNTIME_TOO_LOW")
@@ -41,3 +43,21 @@ data class AreaConfiguration(
 ) {
     val spawnArea: List<Pos> get() = listOf(spawnArea1, spawnArea2)
 }
+
+@Serializable
+data class PvpConfiguration(
+    val food: Boolean,
+    val fallDamage: Boolean,
+    val equipmentDamage: Boolean,
+    val exhaustion: Boolean,
+    val knockback: KnockbackConfiguration
+)
+
+@Serializable
+data class KnockbackConfiguration(
+    val horizontal: Double,
+    val vertical: Double,
+    val verticalLimit: Double,
+    val extraHorizontal: Double,
+    val extraVertical: Double
+)
