@@ -21,7 +21,6 @@ import com.github.rushyverse.pvpbox.listener.item.PlayerItemClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerSwapItemListener
 import com.github.rushyverse.utils.randomString
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import net.minestom.server.MinecraftServer
 import net.minestom.server.entity.Player
@@ -104,7 +103,7 @@ class PvpboxServerTest : AbstractTest() {
 
             sequenceOf(
                 PlayerLoginListener(mockk()),
-                PlayerSpawnListener(mockk(), mockk(), spawnPoint, spawnArea, mockk()),
+                PlayerSpawnListener(mockk(), mockk(), spawnPoint, mockk()),
                 PlayerAttackListener(spawnArea),
                 PlayerMoveListener(limitY),
                 PlayerDeathListener(spawnPoint, spawnArea),

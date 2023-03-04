@@ -122,7 +122,6 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
                 translationsProvider,
                 HotbarItemsManager(translationsProvider, kitsList),
                 areaConfig.spawnPoint,
-                spawnArea,
                 mapImage
             )
         )

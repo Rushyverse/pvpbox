@@ -1,5 +1,7 @@
 package com.github.rushyverse.pvpbox.map
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Entity
 import net.minestom.server.entity.EntityType
@@ -12,6 +14,7 @@ import net.minestom.server.map.framebuffers.LargeGraphics2DFramebuffer
 import net.minestom.server.network.packet.server.SendablePacket
 import java.awt.geom.AffineTransform
 import javax.imageio.ImageIO
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A class that allows you to create an Image as Map Item Frame on the server.
@@ -69,17 +72,32 @@ class MapImage(
             return Array(NUMBER_IMAGE_PACKETS) {
                 val x = it % 5
                 val y = it / 5
-                framebuffer.createSubView(x shl DEFAULT_RESOLUTION_BITWISE_OPERATION, y shl DEFAULT_RESOLUTION_BITWISE_OPERATION).preparePacket(it)
+                framebuffer.createSubView(
+                    x shl DEFAULT_RESOLUTION_BITWISE_OPERATION,
+                    y shl DEFAULT_RESOLUTION_BITWISE_OPERATION
+                ).preparePacket(it)
             }
         }
     }
 
-    val packets: Array<SendablePacket> by lazy {
-        val framebuffer = LargeGraphics2DFramebuffer(widthBlocks shl DEFAULT_RESOLUTION_BITWISE_OPERATION, heightBlocks shl DEFAULT_RESOLUTION_BITWISE_OPERATION)
-        MapImage::class.java.getResourceAsStream("/$resourceImageName")?.buffered()?.use {
-            val image = ImageIO.read(it)
-            framebuffer.renderer.drawRenderedImage(image, AffineTransform.getScaleInstance(1.0, 1.0))
-            mapPackets(framebuffer)
-        } ?: error("Unable to retrieve the image $resourceImageName in resources.")
+    private var _packets: Array<SendablePacket>? = null
+
+    suspend fun packets(loadImageCoroutineContext: CoroutineContext = Dispatchers.IO): Array<SendablePacket> {
+        return _packets ?: withContext(loadImageCoroutineContext) {
+            val framebuffer = LargeGraphics2DFramebuffer(
+                widthBlocks shl DEFAULT_RESOLUTION_BITWISE_OPERATION,
+                heightBlocks shl DEFAULT_RESOLUTION_BITWISE_OPERATION
+            )
+
+            val inputStream = MapImage::class.java.getResourceAsStream("/$resourceImageName")
+                ?: error("Unable to retrieve the image $resourceImageName in resources.")
+
+            inputStream.buffered().use {
+                val image = ImageIO.read(it)
+                framebuffer.renderer.drawRenderedImage(image, AffineTransform.getScaleInstance(1.0, 1.0))
+            }
+
+            mapPackets(framebuffer).also { _packets = it }
+        }
     }
 }
