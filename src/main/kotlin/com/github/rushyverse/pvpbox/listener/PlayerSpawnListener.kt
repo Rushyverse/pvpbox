@@ -34,8 +34,7 @@ class PlayerSpawnListener(
         player.setHeldItemSlot(4)
 
         player.teleport(spawnPoint)
-
-        mapImage.packets()?.toList()?.let { player.sendPackets(it) }
+        player.sendPackets(*mapImage.packets)
 
         return EventListener.Result.SUCCESS
     }

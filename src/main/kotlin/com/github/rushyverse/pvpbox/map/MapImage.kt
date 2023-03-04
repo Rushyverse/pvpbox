@@ -19,7 +19,6 @@ import javax.imageio.ImageIO
  * @property widthBlocks The width blocks size desired for the item frame.
  * @property heightBlocks The height blocks size desired for the item frame.
  * @property packets The packets list to send to new players.
- * @constructor
  */
 class MapImage(
     private val resourceImageName: String,
@@ -31,30 +30,32 @@ class MapImage(
         /**
          * Corresponds to the default resolution used to build image as packets.
          */
-        const val DEFAULT_RESOLUTION = 128;
+        private const val DEFAULT_RESOLUTION_BITWISE_OPERATION = 7;
+
+        private const val NUMBER_IMAGE_PACKETS = 15
 
         /**
          * Create an item frame on which the image will be displayed
          * @param instance The instance where you want to create the frame.
-         * @param maximum The position of the frame.
+         * @param pos The position of the frame.
          */
-        fun createItemFrame(instance: Instance, maximum: Pos) {
-            val maxX = maximum.blockX()
-            val maxY = maximum.blockY()
-            val z = maximum.blockZ()
-            val yaw = maximum.yaw
-            for (i in 0..14) {
+        fun createItemFrame(instance: Instance, pos: Pos) {
+            val maxX = pos.blockX()
+            val maxY = pos.blockY()
+            val z = pos.blockZ()
+            val yaw = pos.yaw
+            repeat(NUMBER_IMAGE_PACKETS) { i ->
                 val x = maxX - i % 5
                 val y = maxY - i / 5
+
                 val itemFrame = Entity(EntityType.ITEM_FRAME)
                 val meta = itemFrame.entityMeta as ItemFrameMeta
                 itemFrame.setInstance(instance, Pos(x.toDouble(), y.toDouble(), z.toDouble(), yaw, 0f))
                 meta.setNotifyAboutChanges(false)
+
                 meta.orientation = ItemFrameMeta.Orientation.NORTH
                 meta.isInvisible = true
-                meta.item = ItemStack.builder(Material.FILLED_MAP)
-                    .meta(MapMeta::class.java) { builder: MapMeta.Builder -> builder.mapId(i) }
-                    .build()
+                meta.item = ItemStack.builder(Material.FILLED_MAP).meta(MapMeta::class.java) { it.mapId(i) }.build()
                 meta.setNotifyAboutChanges(true)
             }
         }
@@ -64,34 +65,21 @@ class MapImage(
          * @param framebuffer The frame buffer to convert as packets.
          * @return The list of packets.
          */
-        private fun mapPackets(framebuffer: LargeGraphics2DFramebuffer): Array<SendablePacket?> {
-            return Array(15) {
+        private fun mapPackets(framebuffer: LargeGraphics2DFramebuffer): Array<SendablePacket> {
+            return Array(NUMBER_IMAGE_PACKETS) {
                 val x = it % 5
                 val y = it / 5
-                framebuffer.createSubView(x shl 7, y shl 7).preparePacket(it)
+                framebuffer.createSubView(x shl DEFAULT_RESOLUTION_BITWISE_OPERATION, y shl DEFAULT_RESOLUTION_BITWISE_OPERATION).preparePacket(it)
             }
         }
     }
 
-    private var packets: Array<SendablePacket?>? = null
-
-    /**
-     * Get the packets of the current Map Image.
-     * This function generates and stores packets if they are not created.
-     * @return The list of packets.
-     */
-    fun packets(): Array<SendablePacket?>? {
-        return if (packets != null)
-            packets
-        else {
-            val framebuffer =
-                LargeGraphics2DFramebuffer(widthBlocks * DEFAULT_RESOLUTION, heightBlocks * DEFAULT_RESOLUTION)
-            javaClass.getResourceAsStream("/$resourceImageName")!!.buffered().use {
-                val image = ImageIO.read(it)
-                framebuffer.renderer.drawRenderedImage(image, AffineTransform.getScaleInstance(1.0, 1.0))
-                packets = mapPackets(framebuffer)
-            }
-            packets
-        }
+    val packets: Array<SendablePacket> by lazy {
+        val framebuffer = LargeGraphics2DFramebuffer(widthBlocks shl DEFAULT_RESOLUTION_BITWISE_OPERATION, heightBlocks shl DEFAULT_RESOLUTION_BITWISE_OPERATION)
+        MapImage::class.java.getResourceAsStream("/$resourceImageName")?.buffered()?.use {
+            val image = ImageIO.read(it)
+            framebuffer.renderer.drawRenderedImage(image, AffineTransform.getScaleInstance(1.0, 1.0))
+            mapPackets(framebuffer)
+        } ?: error("Unable to retrieve the image $resourceImageName in resources.")
     }
 }
