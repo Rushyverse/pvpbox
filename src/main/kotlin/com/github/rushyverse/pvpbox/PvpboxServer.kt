@@ -1,6 +1,8 @@
 package com.github.rushyverse.pvpbox
 
 import com.github.rushyverse.api.RushyServer
+import com.github.rushyverse.api.image.MapImage
+import com.github.rushyverse.api.image.buildPacketsFromResources
 import com.github.rushyverse.api.position.CubeArea
 import com.github.rushyverse.api.translation.TranslationsProvider
 import com.github.rushyverse.core.cache.CacheClient
@@ -21,7 +23,6 @@ import com.github.rushyverse.pvpbox.listener.item.PlayerDropItemListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerInventoryClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerItemClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerSwapItemListener
-import com.github.rushyverse.pvpbox.map.MapImage
 import io.github.bloepiloepi.pvp.PvpExtension
 import io.github.bloepiloepi.pvp.config.DamageConfig
 import io.github.bloepiloepi.pvp.config.FoodConfig
@@ -62,12 +63,9 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
             )
 
             val mapImageConfig = area.mapImage
-            val mapImage = MapImage(
-                mapImageConfig.resourceImageName,
-                mapImageConfig.widthBlocks,
-                mapImageConfig.heightBlocks
-            )
-            MapImage.createItemFrame(it, mapImageConfig.mapPosition)
+            val mapImage = MapImage()
+            mapImage.buildPacketsFromResources(mapImageConfig.resourceImageName)
+            mapImage.createItemFrames(it, mapImageConfig.mapPosition, mapImageConfig.orientation)
 
             val kitsList = listOf(
                 WarriorKit(),
@@ -146,7 +144,7 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
     }
 
     private fun loadPvp(configuration: PvpConfiguration, instance: Instance) {
-        PvpExtension.init();
+        PvpExtension.init()
         val foodConfig = FoodConfig.emptyBuilder(configuration.food) // Disable food
         val damageConfig = DamageConfig.legacyBuilder()
             .fallDamage(configuration.fallDamage)
@@ -173,6 +171,6 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
         }
 
         MinecraftServer.getGlobalEventHandler().addChild(pvpConfig.createNode())
-        instance.explosionSupplier = PvpExplosionSupplier.INSTANCE;
+        instance.explosionSupplier = PvpExplosionSupplier.INSTANCE
     }
 }

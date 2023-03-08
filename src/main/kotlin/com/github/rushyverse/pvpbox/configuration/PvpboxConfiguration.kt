@@ -1,10 +1,12 @@
 package com.github.rushyverse.pvpbox.configuration
 
 import com.github.rushyverse.api.configuration.*
+import com.github.rushyverse.api.serializer.ItemFrameMetaOrientationSerializer
 import com.github.rushyverse.api.serializer.PosSerializer
 import kotlinx.serialization.*
 import kotlinx.serialization.encoding.*
 import net.minestom.server.coordinate.Pos
+import net.minestom.server.entity.metadata.other.ItemFrameMeta.Orientation
 
 /**
  * Configuration of the server.
@@ -67,18 +69,17 @@ data class AreaConfiguration(
 /**
  * Map Image configuration.
  * @property resourceImageName The resource that used to be printed as map.
- * @property widthBlocks The width blocks size desired for the item frame.
- * @property heightBlocks The height blocks size desired for the item frame.
  * @property mapPosition The position of the map including yaw.
+ * @property orientation The orientation of the map.
  * @constructor
  */
 @Serializable
 data class MapImageConfiguration(
     val resourceImageName: String,
-    val widthBlocks: Int,
-    val heightBlocks: Int,
     @Serializable(with = PosSerializer::class)
-    val mapPosition: Pos
+    val mapPosition: Pos,
+    @Serializable(with = ItemFrameMetaOrientationSerializer::class)
+    val orientation: Orientation
 )
 
 /**

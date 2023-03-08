@@ -1,11 +1,11 @@
 package com.github.rushyverse.pvpbox.listener
 
 import com.github.rushyverse.api.extension.setItemStack
+import com.github.rushyverse.api.image.MapImage
 import com.github.rushyverse.api.listener.EventListenerSuspend
 import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.rushyverse.api.translation.TranslationsProvider
 import com.github.rushyverse.pvpbox.items.hotbar.HotbarItemsManager
-import com.github.rushyverse.pvpbox.map.MapImage
 import com.github.rushyverse.pvpbox.scoreboard.PvpboxScoreboard
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
@@ -32,7 +32,7 @@ class PlayerSpawnListener(
         player.setHeldItemSlot(4)
 
         player.teleport(spawnPoint)
-        player.sendPackets(*mapImage.packets())
+        player.sendPackets(*mapImage.packets)
     }
 
     private fun giveItems(player: Player) {
