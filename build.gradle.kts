@@ -22,7 +22,7 @@ dependencies {
     implementation("com.github.Rushyverse:core:644fc1b6cc") {
         exclude("ch.qos.logback")
     }
-    implementation("com.github.Rushyverse:api:feat~npc-SNAPSHOT")
+    implementation("com.github.Rushyverse:api:feat~image_loader-SNAPSHOT")
     implementation("com.ibm.icu:icu4j:72.1")
     implementation("com.github.TogAr2:MinestomPvP:bebed02b71")
 
