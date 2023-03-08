@@ -1,27 +1,35 @@
 package com.github.rushyverse.pvpbox
 
 import com.github.rushyverse.api.RushyServer
+import com.github.rushyverse.api.image.MapImage
+import com.github.rushyverse.api.image.buildPacketsFromResources
 import com.github.rushyverse.api.position.CubeArea
 import com.github.rushyverse.api.translation.TranslationsProvider
 import com.github.rushyverse.core.cache.CacheClient
+import com.github.rushyverse.pvpbox.configuration.PvpConfiguration
 import com.github.rushyverse.pvpbox.configuration.PvpboxConfiguration
 import com.github.rushyverse.pvpbox.items.hotbar.HotbarItemsManager
 import com.github.rushyverse.pvpbox.kit.ArcherKit
 import com.github.rushyverse.pvpbox.kit.WarriorKit
 import com.github.rushyverse.pvpbox.kit.commons.AbstractKit
-import com.github.rushyverse.pvpbox.listener.*
+import com.github.rushyverse.pvpbox.listener.PlayerAttackListener
+import com.github.rushyverse.pvpbox.listener.PlayerLoginListener
+import com.github.rushyverse.pvpbox.listener.PlayerMoveListener
+import com.github.rushyverse.pvpbox.listener.PlayerSpawnListener
 import com.github.rushyverse.pvpbox.listener.block.PlayerBreakBlockListener
 import com.github.rushyverse.pvpbox.listener.block.PlayerPlaceBlockListener
 import com.github.rushyverse.pvpbox.listener.death.PlayerDeathListener
-import com.github.rushyverse.pvpbox.listener.death.PlayerPreDeathListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerDropItemListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerInventoryClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerItemClickListener
 import com.github.rushyverse.pvpbox.listener.item.PlayerSwapItemListener
 import io.github.bloepiloepi.pvp.PvpExtension
+import io.github.bloepiloepi.pvp.config.DamageConfig
 import io.github.bloepiloepi.pvp.config.FoodConfig
 import io.github.bloepiloepi.pvp.config.PvPConfig
+import io.github.bloepiloepi.pvp.events.LegacyKnockbackEvent
 import io.github.bloepiloepi.pvp.explosion.PvpExplosionSupplier
+import io.github.bloepiloepi.pvp.legacy.LegacyKnockbackSettings
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -29,24 +37,17 @@ import io.ktor.serialization.kotlinx.json.*
 import io.lettuce.core.RedisURI
 import kotlinx.serialization.json.Json
 import net.minestom.server.MinecraftServer
-import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
 import net.minestom.server.event.GlobalEventHandler
 import net.minestom.server.instance.Instance
 import net.minestom.server.instance.InstanceContainer
 
+
 suspend fun main(args: Array<String>) {
     PvpboxServer(args.firstOrNull()).start()
 }
 
-private lateinit var kitsList: List<AbstractKit>
-private lateinit var spawnArea: CubeArea<Player>
-private lateinit var instance: Instance
-private lateinit var spawnPoint: Pos
-
 class PvpboxServer(private val configuration: String? = null) : RushyServer() {
-
-    private  val limitY = 80.0 // Below this limit, player is killed
 
     companion object {
         const val BUNDLE_PVPBOX = "pvpbox"
@@ -61,31 +62,23 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
                 )
             )
 
-            instance = MinecraftServer.getInstanceManager().instances.first()
-            val pos1 = Pos(-114.0, 152.0, 103.0)
-            val pos2 = Pos(-134.0, 167.0, 123.0)
-            spawnArea = CubeArea<Player>(instance, pos1, pos2)
-            spawnPoint = Pos(-123.5, 156.0, 113.5).withYaw(-180F)
+            val mapImageConfig = area.mapImage
+            val mapImage = MapImage()
+            mapImage.buildPacketsFromResources(mapImageConfig.resourceImageName)
+            mapImage.createItemFrames(it, mapImageConfig.mapPosition, mapImageConfig.orientation)
 
-            kitsList = listOf<AbstractKit>(
+            val kitsList = listOf(
                 WarriorKit(),
                 ArcherKit()
             )
 
             val globalEventHandler = MinecraftServer.getGlobalEventHandler()
-            addListeners(globalEventHandler, it, translationsProvider)
+            addListeners(this, globalEventHandler, it, translationsProvider, kitsList, mapImage)
 
             API.registerCommands()
             addCommands()
 
-            PvpExtension.init();
-            MinecraftServer.getGlobalEventHandler().addChild(PvpExtension.legacyEvents())
-            .addChild(
-                PvPConfig.emptyBuilder()
-                    .food(FoodConfig.legacyBuilder().naturalExhaustion(false))
-                    .build().createNode()
-            );
-            instance.explosionSupplier = PvpExplosionSupplier.INSTANCE;
+            loadPvp(pvp, it)
 
             MinecraftServer.setBrandName("Rushyverse-Pvpbox")
         }
@@ -112,22 +105,27 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
      * @param instanceContainer Instance container of the server.
      */
     private fun addListeners(
+        configuration: PvpboxConfiguration,
         globalEventHandler: GlobalEventHandler,
-        instanceContainer: InstanceContainer, translationsProvider: TranslationsProvider
+        instanceContainer: InstanceContainer,
+        translationsProvider: TranslationsProvider,
+        kitsList: List<AbstractKit>,
+        mapImage: MapImage
     ) {
         globalEventHandler.addListener(PlayerLoginListener(instanceContainer))
+        val areaConfig = configuration.area
+        val spawnArea = CubeArea<Player>(instanceContainer, areaConfig.spawnArea1, areaConfig.spawnArea2)
         globalEventHandler.addListener(
             PlayerSpawnListener(
                 translationsProvider,
                 HotbarItemsManager(translationsProvider, kitsList),
-                spawnPoint,
-                spawnArea,
+                areaConfig.spawnPoint,
+                mapImage
             )
         )
         globalEventHandler.addListener(PlayerAttackListener(spawnArea))
-        globalEventHandler.addListener(PlayerMoveListener(limitY))
-        globalEventHandler.addListener(PlayerDeathListener(spawnPoint,spawnArea))
-        globalEventHandler.addListener(PlayerPreDeathListener())
+        globalEventHandler.addListener(PlayerMoveListener(areaConfig.limitY))
+        globalEventHandler.addListener(PlayerDeathListener(areaConfig.spawnPoint, spawnArea))
 
         globalEventHandler.addListener(PlayerItemClickListener())
         globalEventHandler.addListener(PlayerDropItemListener())
@@ -143,5 +141,36 @@ class PvpboxServer(private val configuration: String? = null) : RushyServer() {
     private fun addCommands() {
         val commandManager = MinecraftServer.getCommandManager()
 
+    }
+
+    private fun loadPvp(configuration: PvpConfiguration, instance: Instance) {
+        PvpExtension.init()
+        val foodConfig = FoodConfig.emptyBuilder(configuration.food) // Disable food
+        val damageConfig = DamageConfig.legacyBuilder()
+            .fallDamage(configuration.fallDamage)
+            .equipmentDamage(configuration.equipmentDamage)
+            .exhaustion(configuration.exhaustion)
+        val pvpConfig = PvPConfig.legacyBuilder()
+            .food(foodConfig)
+            .damage(damageConfig)
+            .build()
+
+        // Knockback
+        val kbConf = configuration.knockback
+        val kbSettings = LegacyKnockbackSettings.builder()
+            .horizontal(kbConf.horizontal)
+            .vertical(kbConf.vertical)
+            .verticalLimit(kbConf.verticalLimit)
+            .extraHorizontal(kbConf.extraHorizontal)
+            .extraVertical(kbConf.extraVertical)
+            .build()
+        MinecraftServer.getGlobalEventHandler().addListener(
+            LegacyKnockbackEvent::class.java
+        ) { event: LegacyKnockbackEvent ->
+            event.settings = kbSettings
+        }
+
+        MinecraftServer.getGlobalEventHandler().addChild(pvpConfig.createNode())
+        instance.explosionSupplier = PvpExplosionSupplier.INSTANCE
     }
 }

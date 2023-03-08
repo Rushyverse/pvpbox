@@ -1,28 +1,28 @@
 package com.github.rushyverse.pvpbox.listener
 
 import com.github.rushyverse.api.extension.setItemStack
-import com.github.rushyverse.api.position.CubeArea
+import com.github.rushyverse.api.image.MapImage
+import com.github.rushyverse.api.listener.EventListenerSuspend
 import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.rushyverse.api.translation.TranslationsProvider
 import com.github.rushyverse.pvpbox.items.hotbar.HotbarItemsManager
 import com.github.rushyverse.pvpbox.scoreboard.PvpboxScoreboard
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
-import net.minestom.server.event.EventListener
 import net.minestom.server.event.player.PlayerSpawnEvent
 
 class PlayerSpawnListener(
     private val translationsProvider: TranslationsProvider,
     private val hotbarItemsManager: HotbarItemsManager,
     private val spawnPoint: Pos,
-    private val spawnArea: CubeArea<Player>
-) : EventListener<PlayerSpawnEvent> {
+    private val mapImage: MapImage
+) : EventListenerSuspend<PlayerSpawnEvent>() {
 
     override fun eventType(): Class<PlayerSpawnEvent> {
         return PlayerSpawnEvent::class.java
     }
 
-    override fun run(event: PlayerSpawnEvent): EventListener.Result {
+    override suspend fun runSuspend(event: PlayerSpawnEvent) {
         val player = event.player
         val scoreboard = PvpboxScoreboard(translationsProvider, player)
 
@@ -32,8 +32,7 @@ class PlayerSpawnListener(
         player.setHeldItemSlot(4)
 
         player.teleport(spawnPoint)
-
-        return EventListener.Result.SUCCESS
+        player.sendPackets(*mapImage.packets)
     }
 
     private fun giveItems(player: Player) {
