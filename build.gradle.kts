@@ -22,7 +22,7 @@ dependencies {
 
     implementation("com.github.Rushyverse:core:c75a7ccc9f")
     implementation("com.github.Rushyverse:api:5c29c90fe5")
-    implementation("com.ibm.icu:icu4j:72.1")
+    implementation("com.ibm.icu:icu4j:73.1")
 
     implementation("com.github.TogAr2:MinestomPvP:bebed02b71")
 
